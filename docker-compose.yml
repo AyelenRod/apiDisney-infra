@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  backend:
+    build: ../backend-disney
+    ports:
+      - "3001:3001"
+    networks:
+      - disney-net
+
+  frontend:
+    build: ../frontend-disney
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_BACKEND_URL=http://backend:3001
+    networks:
+      - disney-net
+
+networks:
+  disney-net: 
+    driver: bridge
