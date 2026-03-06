@@ -1,21 +1,36 @@
 version: '3.8'
-services:
-  backend:
-    build: ../backend-disney
-    ports:
-      - "3001:3001"
-    networks:
-      - disney-net
 
-  frontend:
-    build: ../frontend-disney
+services:
+  disney-backend:
+    build: 
+      context: ../backend-disney
+      dockerfile: Dockerfile
     ports:
-      - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_BACKEND_URL=http://backend:3001
+      - "${BACKEND_PORT:-3001}:${BACKEND_PORT:-3001}"
+    env_file:
+      - ../backend-disney/.env
     networks:
-      - disney-net
+      - disney-network
+    restart: always
+
+  disney-frontend:
+    build: 
+      context: ../frontend-disney
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-http://localhost:3001}
+    ports:
+      - "${FRONTEND_PORT:-3000}:${FRONTEND_PORT:-3000}"
+    env_file:
+      - ../frontend-disney/.env.local
+    environment:
+      - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL:-http://localhost:3001}
+    networks:
+      - disney-network
+    depends_on:
+      - disney-backend
+    restart: always
 
 networks:
-  disney-net: 
+  disney-network:
     driver: bridge
